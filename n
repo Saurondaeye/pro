@@ -1,0 +1,131 @@
+local Players = game:GetService("Players")
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "UR Nation Info",
+    LoadingTitle = "UR Nation Info",
+    LoadingSubtitle = "by Sauron",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "URNationInfo",
+        FileName = "Configuration"
+    }
+})
+
+-- Create Main Tab
+local MainTab = Window:CreateTab("Info Tab")
+
+-- Variables
+local selectedNation = nil
+
+local Infolabel = MainTab:CreateLabel("Type 'Papalstate' for Papal States and 'GreatHorde' for Great Horde.")
+-- Create Search Box
+local SearchBox = MainTab:CreateInput({
+    Name = "Search Nation",
+    PlaceholderText = "Enter nation name (e.g. FRANCE)",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        local nationName = string.upper(text)
+        local nationFolder = workspace.Game_Engine.NationsOnMap:FindFirstChild(nationName)
+        
+        if nationFolder then
+            selectedNation = nationFolder.Data
+            UpdateNationInfo(selectedNation)
+            SetupValueChanged(selectedNation)
+        end
+    end,
+})
+
+-- Create Labels
+local PowerProjectionLabel = MainTab:CreateLabel("Power Projection: 0")
+local PrestigeLabel = MainTab:CreateLabel("Prestige: 0")
+local MoneyLabel = MainTab:CreateLabel("Money: 0")
+local ManpowerLabel = MainTab:CreateLabel("Manpower: 0")
+local MaxManpowerLabel = MainTab:CreateLabel("Max Manpower: 0")
+-- Function to update nation info
+function UpdateNationInfo(nationData)
+    if nationData then
+        local powerProjection = nationData:WaitForChild("PowerProjection", 2)
+        local prestige = nationData:WaitForChild("Prestige", 2)
+        local money = nationData:WaitForChild("Money", 2)
+        local manpower = nationData:WaitForChild("Manpower", 2)
+        local maxManpower = nationData:WaitForChild("MaxManpower", 2)
+        
+        if powerProjection then
+            PowerProjectionLabel:Set("Power Projection: " .. tostring(powerProjection.Value))
+        end
+        if prestige then
+            PrestigeLabel:Set("Prestige: " .. tostring(prestige.Value))
+        end
+        if money then
+            MoneyLabel:Set("Money: " .. tostring(money.Value))
+        end
+        if manpower then
+            ManpowerLabel:Set("Manpower: " .. tostring(manpower.Value))
+        end
+        if maxManpower then
+            MaxManpowerLabel:Set("Max Manpower: " .. tostring(maxManpower.Value))
+        end
+    end
+end
+
+-- Setup automatic updates
+local function SetupValueChanged(nationData)
+    if nationData then
+        local powerProjection = nationData:WaitForChild("PowerProjection", 2)
+        local prestige = nationData:WaitForChild("Prestige", 2)
+        local money = nationData:WaitForChild("Money", 2)
+        local manpower = nationData:WaitForChild("Manpower", 2)
+        local maxManpower = nationData:WaitForChild("MaxManpower", 2)
+        
+        if powerProjection then
+            powerProjection.Changed:Connect(function()
+                if nationData == selectedNation then
+                    PowerProjectionLabel:Set("Power Projection: " .. tostring(powerProjection.Value))
+                end
+            end)
+        end
+        
+        if prestige then
+            prestige.Changed:Connect(function()
+                if nationData == selectedNation then
+                    PrestigeLabel:Set("Prestige: " .. tostring(prestige.Value))
+                end
+            end)
+        end
+        
+        if money then
+            money.Changed:Connect(function()
+                if nationData == selectedNation then
+                    MoneyLabel:Set("Money: " .. tostring(money.Value))
+                end
+            end)
+        end
+        
+        if manpower then
+            manpower.Changed:Connect(function()
+                if nationData == selectedNation then
+                    ManpowerLabel:Set("Manpower: " .. tostring(manpower.Value))
+                end
+            end)
+        end
+        
+        if maxManpower then
+            maxManpower.Changed:Connect(function()
+                if nationData == selectedNation then
+                    MaxManpowerLabel:Set("Max Manpower: " .. tostring(maxManpower.Value))
+                end
+            end)
+        end
+    end
+end
+
+-- Auto-refresh timer
+spawn(function()
+    while true do
+        if selectedNation then
+            UpdateNationInfo(selectedNation)
+        end
+        wait(1)
+    end
+end)
